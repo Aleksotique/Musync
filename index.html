@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Musique Hors Ligne</title>
+
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Musique">
+<meta name="theme-color" content="#05070d">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- Library view -->
+  <section id="view-library" class="view active">
+    <div class="topbar"><h1>Bibliothèque</h1></div>
+    <div class="action-row">
+      <button class="btn primary full" id="btn-import">Importer des musiques</button>
+    </div>
+    <ul class="list" id="library-list"></ul>
+    <div class="empty-state" id="library-empty">
+      Aucune musique importée pour le moment.<br>Touche « Importer des musiques » pour ajouter des fichiers déjà téléchargés sur ton téléphone.
+    </div>
+    <input type="file" id="file-input" accept="audio/*" multiple>
+  </section>
+
+  <!-- Playlists view -->
+  <section id="view-playlists" class="view">
+    <div class="topbar"><h1>Playlists</h1></div>
+    <div class="action-row">
+      <button class="btn primary full" id="btn-new-playlist">Nouvelle playlist</button>
+    </div>
+    <ul class="list" id="playlists-list"></ul>
+    <div class="empty-state" id="playlists-empty">
+      Aucune playlist pour le moment.
+    </div>
+  </section>
+
+  <!-- Playlist detail view -->
+  <section id="view-playlist-detail" class="view">
+    <div class="topbar">
+      <button class="btn" id="btn-back-playlists" style="margin-bottom:10px;">‹ Playlists</button>
+      <h1 id="playlist-detail-title">Playlist</h1>
+    </div>
+    <div class="action-row">
+      <button class="btn full" id="btn-add-tracks-to-playlist">Ajouter des musiques</button>
+      <button class="btn" id="btn-delete-playlist">Supprimer</button>
+    </div>
+    <ul class="list" id="playlist-detail-list"></ul>
+    <div class="empty-state" id="playlist-detail-empty">
+      Cette playlist est vide.
+    </div>
+  </section>
+
+  <!-- Mini player -->
+  <div class="miniplayer" id="miniplayer">
+    <div class="thumb" id="mini-thumb"></div>
+    <div class="row-text" id="mini-open-now-playing">
+      <div class="row-title" id="mini-title">—</div>
+      <div class="row-sub" id="mini-artist">—</div>
+    </div>
+    <button id="mini-playpause" aria-label="Lecture / pause"></button>
+    <button id="mini-next" aria-label="Suivant"></button>
+  </div>
+
+  <!-- Tab bar -->
+  <nav class="tabbar">
+    <button class="tab active" data-view="library"><span class="tab-dot"></span>Bibliothèque</button>
+    <button class="tab" data-view="playlists"><span class="tab-dot"></span>Playlists</button>
+  </nav>
+
+  <!-- Now playing full screen -->
+  <div class="nowplaying" id="nowplaying">
+    <div class="np-bg fallback" id="np-bg"></div>
+    <div class="np-scrim"></div>
+    <div class="np-content">
+      <button class="np-close" id="np-close" aria-label="Fermer"></button>
+      <div class="np-art" id="np-art"></div>
+      <div class="np-meta">
+        <div class="np-title" id="np-title">—</div>
+        <div class="np-artist" id="np-artist">—</div>
+      </div>
+      <div class="np-progress">
+        <input type="range" class="np-bar" id="np-seek" min="0" max="1000" value="0">
+        <div class="np-times">
+          <span id="np-time-current">0:00</span>
+          <span id="np-time-total">0:00</span>
+        </div>
+      </div>
+      <div class="np-controls">
+        <button class="np-skip" id="np-prev" aria-label="Précédent"></button>
+        <button class="np-play" id="np-playpause" aria-label="Lecture / pause"></button>
+        <button class="np-skip" id="np-next" aria-label="Suivant"></button>
+      </div>
+      <div class="np-playlist-name" id="np-queue-label"></div>
+    </div>
+  </div>
+
+  <!-- Bottom sheet: new playlist -->
+  <div class="sheet-backdrop" id="sheet-new-playlist">
+    <div class="sheet">
+      <h2>Nouvelle playlist</h2>
+      <input type="text" id="new-playlist-name" placeholder="Nom de la playlist">
+      <button class="btn primary full" id="confirm-new-playlist">Créer</button>
+    </div>
+  </div>
+
+  <!-- Bottom sheet: generic picker (choose a playlist, or pick tracks) -->
+  <div class="sheet-backdrop" id="sheet-picker">
+    <div class="sheet">
+      <h2 id="picker-title">—</h2>
+      <ul class="list" id="picker-list"></ul>
+      <button class="btn primary full" id="picker-done" style="margin-top:14px; display:none;">Terminé</button>
+    </div>
+  </div>
+
+  <audio id="audio" preload="metadata"></audio>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
