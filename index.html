@@ -21,6 +21,7 @@
     <div class="topbar"><h1>Bibliothèque</h1></div>
     <div class="action-row">
       <button class="btn primary full" id="btn-import">Importer des musiques</button>
+      <a class="btn" href="https://m.youtube.com" target="_blank" rel="noopener">YouTube</a>
     </div>
     <ul class="list" id="library-list"></ul>
     <div class="empty-state" id="library-empty">
@@ -105,8 +106,12 @@
   <div class="sheet-backdrop" id="sheet-new-playlist">
     <div class="sheet">
       <h2>Nouvelle playlist</h2>
+      <div class="row-sub" id="new-playlist-context" style="display:none; margin-bottom:10px;"></div>
       <input type="text" id="new-playlist-name" placeholder="Nom de la playlist">
-      <button class="btn primary full" id="confirm-new-playlist">Créer</button>
+      <div style="display:flex; gap:10px;">
+        <button class="btn" id="skip-new-playlist" style="display:none;">Plus tard</button>
+        <button class="btn primary full" id="confirm-new-playlist">Créer</button>
+      </div>
     </div>
   </div>
 
