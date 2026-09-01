@@ -160,7 +160,7 @@ async function parseID3(file) {
 
     while (pos + 10 <= bytes.length) {
       const frameId = String.fromCharCode(bytes[pos], bytes[pos + 1], bytes[pos + 2], bytes[pos + 3]);
-      if (frameId === '\0\0\0\0') break;
+      if (!/^[A-Z0-9]{4}$/.test(frameId)) break; // fin des frames ou données mal formées
       const frameSize = majorVersion >= 4 ? readSynchsafe(bytes, pos + 4) : readUInt32(bytes, pos + 4);
       const frameStart = pos + 10;
       if (frameSize <= 0 || frameStart + frameSize > bytes.length) break;
@@ -196,7 +196,8 @@ const state = {
   isPlaying: false,
   isSeeking: false,
   pickerMode: null,  // 'choose-playlist' | 'pick-tracks'
-  pickerTrackId: null
+  pickerTrackId: null,
+  pendingImportTrackIds: null // ids fraîchement importés, en attente d'un choix de playlist
 };
 
 const pictureUrlCache = new Map(); // trackId -> object URL de la pochette
@@ -277,7 +278,7 @@ async function renderLibrary() {
       actionIcon: ICONS.add
     });
     row.addEventListener('click', () => {
-      playQueue(tracks.map(t => t.id), index, 'Bibliothèque');
+      playQueue(tracks, index, 'Bibliothèque');
     });
     list.appendChild(row);
   });
@@ -338,7 +339,7 @@ async function renderPlaylistDetail() {
       actionIcon: ICONS.remove
     });
     row.addEventListener('click', () => {
-      playQueue(tracks.map(t => t.id), index, playlist.name);
+      playQueue(tracks, index, playlist.name);
     });
     list.appendChild(row);
   });
@@ -416,10 +417,11 @@ function closePicker() {
    Import de fichiers
    ========================================================= */
 async function handleFiles(fileList) {
+  const newIds = [];
   for (const file of fileList) {
     const tags = await parseID3(file);
     const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
-    await dbAdd('tracks', {
+    const id = await dbAdd('tracks', {
       title: tags.title || nameWithoutExt,
       artist: tags.artist || 'Artiste inconnu',
       album: tags.album || '',
@@ -427,24 +429,47 @@ async function handleFiles(fileList) {
       picture: tags.picture || null,
       addedAt: Date.now()
     });
+    newIds.push(id);
   }
   await renderLibrary();
+  if (newIds.length > 1) {
+    openNewPlaylistSheet(newIds);
+  }
+}
+
+function openNewPlaylistSheet(importedTrackIds) {
+  state.pendingImportTrackIds = importedTrackIds || null;
+  el('new-playlist-name').value = '';
+  const contextEl = el('new-playlist-context');
+  const skipBtn = el('skip-new-playlist');
+  if (importedTrackIds && importedTrackIds.length) {
+    contextEl.style.display = 'block';
+    contextEl.textContent = `Regrouper ces ${importedTrackIds.length} musiques importées dans une nouvelle playlist ?`;
+    skipBtn.style.display = 'block';
+  } else {
+    contextEl.style.display = 'none';
+    skipBtn.style.display = 'none';
+  }
+  el('sheet-new-playlist').classList.add('open');
+}
+function closeNewPlaylistSheet() {
+  el('sheet-new-playlist').classList.remove('open');
+  state.pendingImportTrackIds = null;
 }
 
 /* =========================================================
    Lecteur audio + Media Session (contrôles écran verrouillé)
    ========================================================= */
-async function playQueue(trackIds, startIndex, label) {
-  state.queue = trackIds;
+async function playQueue(tracks, startIndex, label) {
+  state.queue = tracks;
   state.queueLabel = label;
-  await loadAndPlay(startIndex);
+  loadAndPlay(startIndex);
 }
 
 async function loadAndPlay(index) {
   if (!state.queue.length) return;
   const wrapped = (index + state.queue.length) % state.queue.length;
-  const trackId = state.queue[wrapped];
-  const track = await dbGet('tracks', trackId);
+  const track = state.queue[wrapped];
   if (!track) return;
 
   state.currentIndex = wrapped;
@@ -561,17 +586,16 @@ function wireEvents() {
     e.target.value = '';
   });
 
-  el('btn-new-playlist').addEventListener('click', () => {
-    el('new-playlist-name').value = '';
-    el('sheet-new-playlist').classList.add('open');
-  });
+  el('btn-new-playlist').addEventListener('click', () => openNewPlaylistSheet(null));
   el('confirm-new-playlist').addEventListener('click', async () => {
     const name = el('new-playlist-name').value.trim();
     if (!name) return;
-    await dbAdd('playlists', { name, trackIds: [], createdAt: Date.now() });
-    el('sheet-new-playlist').classList.remove('open');
+    const trackIds = state.pendingImportTrackIds || [];
+    await dbAdd('playlists', { name, trackIds, createdAt: Date.now() });
+    closeNewPlaylistSheet();
     renderPlaylists();
   });
+  el('skip-new-playlist').addEventListener('click', closeNewPlaylistSheet);
 
   el('btn-back-playlists').addEventListener('click', () => switchView('playlists'));
   el('btn-add-tracks-to-playlist').addEventListener('click', () => {
@@ -629,7 +653,17 @@ function wireEvents() {
 /* =========================================================
    Démarrage
    ========================================================= */
+function initIcons() {
+  // Bug corrigé : ces boutons ne recevaient jamais leur icône avant la
+  // première lecture, ce qui les rendait invisibles.
+  el('mini-next').innerHTML = ICONS.next;
+  el('np-prev').innerHTML = ICONS.prev;
+  el('np-next').innerHTML = ICONS.next;
+  updatePlayIcons();
+}
+
 wireEvents();
+initIcons();
 renderLibrary();
 renderPlaylists();
 
