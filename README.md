@@ -35,6 +35,10 @@ l'ajout à l'écran d'accueil. Le plus simple, gratuit, sans Mac :
 ## Utilisation
 - Onglet Bibliothèque → "Importer des musiques" pour choisir des
   fichiers audio déjà présents sur le téléphone (Fichiers, iCloud, etc.).
+- Le bouton "YouTube" ouvre YouTube dans Safari pour naviguer, sans
+  quitter l'app installée (elle reste ouverte en arrière-plan). L'app
+  n'extrait volontairement aucun fichier audio de YouTube : ça
+  violerait les conditions d'utilisation de la plateforme.
 - Le titre/artiste/pochette sont lus automatiquement depuis les
   informations du fichier (tags ID3) quand elles existent.
 - Onglet Playlists → "Nouvelle playlist", puis "Ajouter des musiques"

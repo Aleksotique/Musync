@@ -285,13 +285,16 @@ html, body {
   border-radius: 2px;
   background: rgba(255,255,255,0.2);
   outline: none;
+  padding: 14px 0; /* agrandit la zone tactile sans épaissir la barre visuellement */
+  box-sizing: content-box;
 }
 .np-bar::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 13px;
-  height: 13px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
 }
 .np-times {
   display: flex;

@@ -624,7 +624,13 @@ function wireEvents() {
   el('np-prev').addEventListener('click', prev);
 
   const seek = el('np-seek');
-  seek.addEventListener('input', () => { state.isSeeking = true; });
+  seek.addEventListener('input', () => {
+    state.isSeeking = true;
+    if (isFinite(audio.duration)) {
+      const previewTime = (Number(seek.value) / 1000) * audio.duration;
+      el('np-time-current').textContent = formatTime(previewTime);
+    }
+  });
   seek.addEventListener('change', () => {
     seekToFraction(Number(seek.value) / 1000);
     state.isSeeking = false;

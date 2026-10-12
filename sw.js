@@ -1,4 +1,4 @@
-const CACHE_NAME = 'musique-hors-ligne-v2';
+const CACHE_NAME = 'musique-hors-ligne-v3';
 const APP_SHELL = [
   './',
   './index.html',
